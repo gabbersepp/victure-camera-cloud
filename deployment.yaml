@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cam-server
+spec:
+  selector:
+    matchLabels:
+      app: cam-server
+  template:
+    metadata:
+      labels:
+        app: cam-server
+    spec:
+      containers:
+      - name: cam-server-backend
+        image: gabbersepp/cam-server-backend
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /app/data
+            name: data
+      - name: cam-server-memory-cleanup
+        image: gabbersepp/cam-server-memory-cleanup
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /app/data
+            name: data
+        env:
+          - name: MAX_SIZE_MB
+            value: "2000"
+      volumes:
+        - name: data
+          hostPath:
+              path: /securitycam
+        - name: backup
+          hostPath:
+              path: /mnt/biehlercloud/SecurityCam
+
+---
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cam-server-backup-memory-cleanup
+spec:
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: cam-server-backup-memory-cleanup
+              image: gabbersepp/cam-server-memory-cleanup
+              volumeMounts:
+                - mountPath: /app/data
+                  name: backup
+              imagePullPolicy: Always
+              env:
+              - name: MAX_SIZE_MB
+                value: "10000"
+              - name: ONE_TIME
+                value: "true"
+          volumes:
+          - name: backup
+            hostPath:
+                path: /mnt/biehlercloud/SecurityCam
+
+---
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cam-server-backup
+spec:
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: cam-server-backup
+              image: gabbersepp/cam-server-backup
+              volumeMounts:
+                - mountPath: /app/data
+                  name: data
+                - mountPath: /app/backup
+                  name: backup
+              imagePullPolicy: Always
+          restartPolicy: OnFailure
+          volumes:
+          - name: data
+            hostPath:
+                path: /securitycam
+          - name: backup
+            hostPath:
+                path: /mnt/biehlercloud/SecurityCam
