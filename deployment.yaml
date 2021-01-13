@@ -43,7 +43,7 @@ metadata:
   name: cam-server-backup-memory-cleanup
 spec:
   schedule: "0 * * * *"
-  successfulJobsHistoryLimit: 0
+  successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
@@ -75,7 +75,7 @@ metadata:
   name: cam-server-backup
 spec:
   schedule: "0 * * * *"
-  successfulJobsHistoryLimit: 0
+  successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
     spec:

@@ -3,14 +3,6 @@
 const fs = require("fs");
 const child_process = require("child_process");
 
-const cams = JSON.parse(fs.readFileSync("/app/config.json").toString());
-
-// url: rtsp://admin:123456@192.168.2.140:554/live/ch00_0
-/*child_process.execSync(
-    "vlc --intf dummy -vvv rtsp://admin:123456@192.168.2.140:554/live/ch00_0 --run-time=60 --stop-time=60 --sout=file/avi:/app/data/go.avi", 
-    { stdio: 'inherit' }
-);*/
-
 function sleep(ms) {
     return new Promise(resolve => {
         setTimeout(resolve, ms);
@@ -19,6 +11,8 @@ function sleep(ms) {
 
 async function fetchAllStreams() {
     while (true) {
+        const cams = JSON.parse(fs.readFileSync("/app/config.json").toString());
+
         cams.forEach(cam => {
             if (cam.process) {
                 if (cam.processEnded) {
