@@ -27,6 +27,10 @@ spec:
         env:
           - name: MAX_SIZE_MB
             value: "2000"
+          - name: EXCLUDE0
+            value: frontendconfig.json
+          - name: EXCLUDE1
+            value: backendconfig.json
       - name: cam-server-client-frontend
         image: gabbersepp/cam-server-client-frontend
         imagePullPolicy: Always
@@ -54,8 +58,6 @@ spec:
         - name: backendconfig
           hostPath:
             path: /securitycam/backendconfig.json
-
-
 
 ---
 
@@ -112,6 +114,11 @@ spec:
                 - mountPath: /app/backup
                   name: backup
               imagePullPolicy: Always
+              env:
+              - name: EXCLUDE0
+                value: frontendconfig.json
+              - name: EXCLUDE1
+                value: backendconfig.json
           restartPolicy: OnFailure
           volumes:
           - name: data
@@ -120,3 +127,33 @@ spec:
           - name: backup
             hostPath:
                 path: /mnt/biehlercloud/SecurityCam
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cam-server-client-backend
+spec:
+  selector:
+    app: cam-server-client-backend
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30009
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cam-server-client-frontend
+spec:
+  selector:
+    app: cam-server-client-frontend
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30010
