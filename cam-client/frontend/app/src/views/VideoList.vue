@@ -16,17 +16,12 @@
                 color="success"
                 @click="selectedVideo = null"
                 class="hide"
-            >
-                X
-            </v-btn>
+            >X</v-btn>
             <video width="500" height="500" controls  :key="selectedVideo.path"  v-if="selectedVideo">
                 <source :src="getVideoUrl(selectedVideo.path)" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </v-overlay>
-        <!--<div id="video-container" >
-            
-        </div>//-->
     </div>
 </template>
 
@@ -86,7 +81,7 @@ export default class VideoList extends Vue {
         height: 100%
     }
     .video-container {
-        //display: flex;
+        cursor: pointer;
 
         div {
             .title {
