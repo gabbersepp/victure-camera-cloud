@@ -27,6 +27,20 @@ spec:
         env:
           - name: MAX_SIZE_MB
             value: "2000"
+      - name: cam-server-client-frontend
+        image: gabbersepp/cam-server-client-frontend
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /app/config.json
+            name: frontendconfig
+      - name: cam-server-client-backend
+        image: gabbersepp/cam-server-client-backend
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /app/data
+          name: backup
+        - mountPath: /app/config.json
+          name: backendconfig
       volumes:
         - name: data
           hostPath:
@@ -34,6 +48,14 @@ spec:
         - name: backup
           hostPath:
               path: /mnt/biehlercloud/SecurityCam
+        - name: frontendconfig
+          hostPath:
+            path: /securitycam/frontendconfig.json
+        - name: backendconfig
+          hostPath:
+            path: /securitycam/backendconfig.json
+
+
 
 ---
 
