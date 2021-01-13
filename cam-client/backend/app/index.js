@@ -4,12 +4,12 @@ const date = require("date-and-time")
 const cors = require('cors')
 const utils = require("./utils.js");
 const converter = require("./converter.js");
-const port = 81
 const app = express();
 
 app.use(cors())
 
 const config = utils.getConfig();
+const port = config.port;
 const dataPath = config.path
 
 app.get("/thumbnail/:video", async (req, res) => {

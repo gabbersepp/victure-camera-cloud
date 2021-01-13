@@ -31,19 +31,23 @@ spec:
             value: frontendconfig.json
           - name: EXCLUDE1
             value: backendconfig.json
-      - name: cam-server-client-frontend
-        image: gabbersepp/cam-server-client-frontend
+      - name: cam-client-frontend
+        image: gabbersepp/cam-client-frontend
+        ports:
+          - containerPort: 80
         imagePullPolicy: Always
         volumeMounts:
-          - mountPath: /app/config.json
+          - mountPath: /usr/share/nginx/html/config
             name: frontendconfig
-      - name: cam-server-client-backend
-        image: gabbersepp/cam-server-client-backend
+      - name: cam-client-backend
+        image: gabbersepp/cam-client-backend
+        ports:
+          - containerPort: 8080
         imagePullPolicy: Always
         volumeMounts:
         - mountPath: /app/data
           name: backup
-        - mountPath: /app/config.json
+        - mountPath: /app/config/
           name: backendconfig
       volumes:
         - name: data
@@ -54,10 +58,10 @@ spec:
               path: /mnt/biehlercloud/SecurityCam
         - name: frontendconfig
           hostPath:
-            path: /securitycam/frontendconfig.json
+            path: /securitycam/frontendconfig/
         - name: backendconfig
           hostPath:
-            path: /securitycam/backendconfig.json
+            path: /securitycam/backendconfig/
 
 ---
 
@@ -116,9 +120,9 @@ spec:
               imagePullPolicy: Always
               env:
               - name: EXCLUDE0
-                value: frontendconfig.json
+                value: frontendconfig
               - name: EXCLUDE1
-                value: backendconfig.json
+                value: backendconfig
           restartPolicy: OnFailure
           volumes:
           - name: data
@@ -133,14 +137,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cam-server-client-backend
+  name: cam-client-backend
 spec:
   selector:
-    app: cam-server-client-backend
+    app: cam-server
   type: NodePort
   ports:
-  - port: 80
-    targetPort: 80
+  - port: 8080
+    targetPort: 8080
     nodePort: 30009
 
 ---
@@ -148,10 +152,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cam-server-client-frontend
+  name: cam-client-frontend
 spec:
   selector:
-    app: cam-server-client-frontend
+    app: cam-server
   type: NodePort
   ports:
   - port: 80
