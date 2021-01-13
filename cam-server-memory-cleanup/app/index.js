@@ -2,6 +2,9 @@ const { readFileSync, unlinkSync, readdirSync, statSync, rmSync } = require('fs'
 const { execSync } = require("child_process");
 const { exit } = require('process');
 
+// specify EXCLUDEn to exclude files
+// e.g. EXCLUDE0=abc.txt
+
 let maxSize = process.env.MAX_SIZE_MB;
 if (!maxSize) {
     console.error("MAX_SIZE_MB env variable does not exist")
@@ -31,15 +34,21 @@ function getSize() {
 }
 
 async function work() {
+    const env = process.env;
+    const toExclude = Object.keys(env).filter(key => key.indexOf("EXCLUDE") > -1).map(key => env[key]);
+
     while(!oneTime) {
         //console.log(`space taken: ${space}`)
 
         while (getSize() > maxSize) {
-            const orderByDate = readdirSync("/app/data").map(f => {
+            const orderByDate = readdirSync("/app/data")
+            .filter(file => !toExclude.find(te => file.indexOf(te) > -1))
+            .map(f => {
                 f = `/app/data/${f}`
                 const stats = statSync(f);
                 return [f, stats.ctime];
-            }).sort((a, b) => {
+            })
+            .sort((a, b) => {
                 return a[1].getTime() - b[1].getTime()
             });
 
