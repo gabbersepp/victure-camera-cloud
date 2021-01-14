@@ -9,18 +9,23 @@ function sleep(ms) {
     })
 }
 
+const camDict = {};
+
 async function fetchAllStreams() {
     while (true) {
         const cams = JSON.parse(fs.readFileSync("/app/config.json").toString());
 
         cams.forEach(cam => {
-            if (cam.process) {
-                if (cam.processEnded) {
-                    cam.process = createProcess(cam, 300);
-                    cam.processEnded = false;
+            const staticCamObj = camDict[cam.name] || cam;
+            camDict[cam.name] = staticCamObj;
+
+            if (staticCamObj.process) {
+                if (staticCamObj.processEnded) {
+                    staticCamObj.process = createProcess(staticCamObj, 300);
+                    staticCamObj.processEnded = false;
                 }
             } else {
-                cam.process = createProcess(cam, 300);
+                staticCamObj.process = createProcess(staticCamObj, 300);
             }
         })
 

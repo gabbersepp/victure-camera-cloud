@@ -3,7 +3,7 @@
         <v-container class="video-list">
             <v-row no-gutters class="video-container">
                 <v-col md="3" v-for="v in videos" :key="v.path" @click="selectedVideo = v" >
-                    <span class="title">{{ formatDate(v.date) }}</span> 
+                    <span class="title">{{ v.cameraName }} - {{ formatDate(v.date) }}</span> 
                     <img :src="getThumbnailUrl(v.path)" class="thumbnail" loading="lazy">
                 </v-col>
             </v-row> 

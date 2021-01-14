@@ -26,22 +26,31 @@ app.get("/list/:page", (req, res) => {
   const files = fs.readdirSync(dataPath);
   let sorted = files.map(f => {
     // this ensures that *_original videos are never read
-    const matches = f.match(/([0-9]{4}.*)\.[0-9]{3}Z\./);
-    if (!matches || matches.length < 2) {
+    const matches = f.match(/(.*)-([0-9]{4}.*)\.[0-9]{3}Z\./);
+    if (!matches || matches.length < 3) {
       // filter out already converted videos
       return null;
     }
-      const dateStr = matches[1]
-      return [`${f}`, date.parse(dateStr, "YYYY-MM-DDTHH-mm-ss", true)]
+      const dateStr = matches[2]
+      const cameraName = matches[1]
+      return [`${f}`, date.parse(dateStr, "YYYY-MM-DDTHH-mm-ss", true), cameraName]
   })
   .filter(x => x)
   .sort((a, b) => b[1].getTime() - a[1].getTime())
   .map(f => {
       return {
           path: f[0],
+          cameraName: f[2],
           date: f[1]
       }
   });
+
+  /*const dict = {};
+  sorted.forEach(s => {
+    const list = dict[s.cameraName] || [];
+    dict[s.cameraName] = list;
+    list.push(s);
+  })*/
 
   // used to enable endless scrolling on client
   const page = (req.params.page || 1) - 1;
