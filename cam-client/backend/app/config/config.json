@@ -1,4 +1,10 @@
 {
     "path": "C:\\git\\rtsp-cam-manager\\cam-client\\test",
-    "port": 81
+    "port": 81,
+    "cameras": [
+        {
+            "url": "rtsp://admin:123456@192.168.2.140:554/live/ch00_00",
+            "name": "Garage"
+        }
+    ]
 }

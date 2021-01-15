@@ -7,10 +7,39 @@ const converter = require("./converter.js");
 const app = express();
 
 app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 
 const config = utils.getConfig();
 const port = config.port;
 const dataPath = config.path
+
+app.get("/cameras", (req, res) => {
+  res.send(config.cameras)
+});
+
+app.post("/camera", (req, res) => {
+  if (!req.body || req.body === "") {
+    res.sendStatus(400);
+    return;
+  }
+
+  config.cameras = config.cameras.filter(c => req.body.name !== c.name)
+  config.cameras.push(req.body);
+  utils.writeConfig(config);
+  res.sendStatus(200);
+})
+
+app.delete("/camera/:name", (req, res) => {
+  if (!req.params.name || req.params.name === "") {
+    res.sendStatus(400);
+    return;
+  }
+
+  config.cameras = config.cameras.filter(c => req.params.name !== c.name)
+  utils.writeConfig(config);
+  res.sendStatus(200);
+})
 
 app.get("/thumbnail/:video", async (req, res) => {
   if (!req.params.video) {
