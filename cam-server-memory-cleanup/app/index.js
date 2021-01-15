@@ -26,7 +26,7 @@ function sleep(ms) {
 }
 
 function getSize() {
-    execSync('du /app/data > du.txt');
+    execSync('du -s /app/data > du.txt');
     const output = readFileSync('du.txt').toString();
     console.log(output);
     let space = output.match(/[0-9]+/)[0]
@@ -37,7 +37,7 @@ async function work() {
     const env = process.env;
     const toExclude = Object.keys(env).filter(key => key.indexOf("EXCLUDE") > -1).map(key => env[key]);
 
-    while(!oneTime) {
+    do {
         //console.log(`space taken: ${space}`)
 
         while (getSize() > maxSize) {
@@ -61,7 +61,7 @@ async function work() {
         if (!oneTime) {
             await sleep(10000)
         }
-    }
+    } while (!oneTime)
 }
 
 work();

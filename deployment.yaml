@@ -19,7 +19,7 @@ spec:
           - mountPath: /app/data
             name: data
       - name: cam-server-memory-cleanup
-        image: gabbersepp/cam-server-memory-cleanup
+        image: gabbersepp/cam-server-memory-cleanup:0.0.1
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /app/data
@@ -80,7 +80,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: cam-server-backup-memory-cleanup
-              image: gabbersepp/cam-server-memory-cleanup
+              image: gabbersepp/cam-server-memory-cleanup:0.0.1
               volumeMounts:
                 - mountPath: /app/data
                   name: backup
