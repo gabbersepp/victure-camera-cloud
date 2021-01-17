@@ -13,7 +13,8 @@ const camDict = {};
 
 async function fetchAllStreams() {
     while (true) {
-        const cams = JSON.parse(fs.readFileSync("/app/config.json").toString());
+        const config = JSON.parse(fs.readFileSync("config/config.json").toString());
+        const cams = config.cameras;
 
         cams.forEach(cam => {
             const staticCamObj = camDict[cam.name] || cam;

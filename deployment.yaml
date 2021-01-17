@@ -18,8 +18,10 @@ spec:
         volumeMounts:
           - mountPath: /app/data
             name: data
+          - mountPath: /app/config
+            name: backendconfig
       - name: cam-server-memory-cleanup
-        image: gabbersepp/cam-server-memory-cleanup:0.0.1
+        image: gabbersepp/cam-server-memory-cleanup
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /app/data
@@ -35,9 +37,6 @@ spec:
         - name: data
           hostPath:
               path: /securitycam
-        - name: frontendconfig
-          hostPath:
-            path: /securitycam/frontendconfig/
         - name: backendconfig
           hostPath:
             path: /securitycam/backendconfig/
