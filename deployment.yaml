@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cam-server
+  name: cam-server-backend
 spec:
   selector:
     matchLabels:
@@ -31,6 +31,33 @@ spec:
             value: frontendconfig.json
           - name: EXCLUDE1
             value: backendconfig.json
+      volumes:
+        - name: data
+          hostPath:
+              path: /securitycam
+        - name: frontendconfig
+          hostPath:
+            path: /securitycam/frontendconfig/
+        - name: backendconfig
+          hostPath:
+            path: /securitycam/backendconfig/
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cam-client
+spec:
+  selector:
+    matchLabels:
+      app: cam-client
+  template:
+    metadata:
+      labels:
+        app: cam-client
+    spec:
+      containers:
       - name: cam-client-frontend
         image: gabbersepp/cam-client-frontend
         ports:
@@ -50,9 +77,6 @@ spec:
         - mountPath: /app/config/
           name: backendconfig
       volumes:
-        - name: data
-          hostPath:
-              path: /securitycam
         - name: backup
           hostPath:
               path: /mnt/biehlercloud/SecurityCam
@@ -137,27 +161,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cam-client-backend
+  name: cam-client
 spec:
   selector:
-    app: cam-server
+    app: cam-client
   type: NodePort
   ports:
   - port: 8080
     targetPort: 8080
     nodePort: 30009
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: cam-client-frontend
-spec:
-  selector:
-    app: cam-server
-  type: NodePort
-  ports:
+    name: backend-port
   - port: 80
     targetPort: 80
     nodePort: 30010
+    name: frontend-port
