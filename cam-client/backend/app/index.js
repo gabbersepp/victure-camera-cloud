@@ -10,15 +10,19 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
-const config = utils.getConfig();
-const port = config.port;
-const dataPath = config.path
+const c = utils.getConfig();
+const port = c.port;
+const dataPath = c.path
+
+const queue = []
 
 app.get("/cameras", (req, res) => {
+  const config = utils.getConfig();
   res.send(config.cameras)
 });
 
 app.post("/camera", (req, res) => {
+  const config = utils.getConfig();
   if (!req.body || req.body === "") {
     res.sendStatus(400);
     return;
@@ -31,6 +35,7 @@ app.post("/camera", (req, res) => {
 })
 
 app.delete("/camera/:name", (req, res) => {
+  const config = utils.getConfig();
   if (!req.params.name || req.params.name === "") {
     res.sendStatus(400);
     return;
@@ -42,16 +47,18 @@ app.delete("/camera/:name", (req, res) => {
 })
 
 app.get("/thumbnail/:video", async (req, res) => {
+  const config = utils.getConfig();
   if (!req.params.video) {
     res.sendStatus(400);
     return;
   }
 
-  const thumnailPath = await converter.ensureThumbnail(dataPath, req.params.video, dataPath + "/thumbnail")
+  const thumnailPath = await converter.ensureThumbnail(queue, dataPath, req.params.video, dataPath + "/thumbnail")
   res.sendFile(thumnailPath);
 })
 
 app.get("/list/:page", (req, res) => {
+  const config = utils.getConfig();
   const files = fs.readdirSync(dataPath);
   let sorted = files.map(f => {
     // this ensures that *_original videos are never read
@@ -88,6 +95,7 @@ app.get("/list/:page", (req, res) => {
 })
 
 app.get("/file/:video", async (req, res) => {
+  const config = utils.getConfig();
   if (!req.params.video) {
     res.sendStatus(400);
     return;

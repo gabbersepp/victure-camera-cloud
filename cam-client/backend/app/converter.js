@@ -27,7 +27,7 @@ async function ensureConvertedFile(filePath) {
  * @param {*} videoName 
  * @param {*} thumbnailContainingDir 
  */
-async function ensureThumbnail(videoContainingDir, videoName, thumbnailContainingDir) {
+async function ensureThumbnail(queue, videoContainingDir, videoName, thumbnailContainingDir) {
     const tempDirName = `${thumbnailContainingDir}/${videoName}_dir`;
     const thumbnailPath = `${thumbnailContainingDir}/${videoName}.png`
     const videoPath = `${videoContainingDir}/${videoName}`
@@ -37,17 +37,40 @@ async function ensureThumbnail(videoContainingDir, videoName, thumbnailContainin
             fs.mkdirSync(tempDirName);
         }
 
-        // this will create multiple snapshots
-        const cmd = `vlc ${videoPath} --intf dummy --video-filter=scene --start-time=0 --stop-time=1 --scene-ratio=8 --scene-path="${tempDirName}" --vout=dummy --avcodec-hw=none vlc://quit`;
-        await createProcess(cmd);
+        const nextId = new Date().getTime();
+        queue.push(nextId);
 
-        // there may be multiple snapshots, take the first one
-        const firstImg = fs.readdirSync(tempDirName)[0]
-        fs.copyFileSync(tempDirName + "/" + firstImg, thumbnailPath)
-        fs.rmdirSync(tempDirName, { recursive: true, force: true })
+        while (true) {
+            try {
+                if (queue[0] === nextId) {
+                    // this will create multiple snapshots
+                    const cmd = `vlc ${videoPath} --intf dummy --video-filter=scene --start-time=0 --stop-time=1 --scene-ratio=8 --scene-path="${tempDirName}" --vout=dummy --avcodec-hw=none vlc://quit`;
+                    await createProcess(cmd);
+    
+                    // there may be multiple snapshots, take the first one
+                    const firstImg = fs.readdirSync(tempDirName)[0]
+                    fs.copyFileSync(tempDirName + "/" + firstImg, thumbnailPath)
+                    fs.rmdirSync(tempDirName, { recursive: true, force: true })
+                    queue.splice(0, 1);
+                    return thumbnailPath;
+                } else {
+                    await sleep(100);
+                }
+            } catch (e) {
+                queue.splice(0, 1);
+                throw new Error("error while creating thumbnail")
+            }
+        }
     }
 
     return thumbnailPath;
+}
+
+
+function sleep(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    })
 }
 
 function createProcess(cmd) {
