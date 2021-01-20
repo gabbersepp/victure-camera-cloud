@@ -41,11 +41,11 @@ A small VueJS app.
 The easiest and best would have been to use ffmpeg. But I (and others in the internet) had no success. It worked only with RTSP Proxies or VLC.
 
 # Additional links
-[How to force VLC to exit after recording](https://forum.videolan.org/viewtopic.php?t=40406#p368523)
-[VLC Command line](https://wiki.videolan.org/VLC_command-line_help/)
-[Record RTP stream with VLC](https://forum.videolan.org/viewtopic.php?t=130881)
-[VLC without interface](https://superuser.com/questions/664826/play-vlc-stream-without-interface)
-[Why the Victure 730 does not work properly](https://community.home-assistant.io/t/victure-camera-not-working/141689/40)
-[Find correct URL for connection to Victure cam](https://www.ispyconnect.com/man.aspx?n=Victure)
-[Send video in nodeJS](https://github.com/daspinola/video-stream-sample/blob/master/server.js)
-[Video conversion with VLC using CLI](https://superuser.com/questions/388511/how-can-i-make-the-following-conversion-in-vlc-from-the-commandline/390240)
++ [How to force VLC to exit after recording](https://forum.videolan.org/viewtopic.php?t=40406#p368523)
++ [VLC Command line](https://wiki.videolan.org/VLC_command-line_help/)
++ [Record RTP stream with VLC](https://forum.videolan.org/viewtopic.php?t=130881)
++ [VLC without interface](https://superuser.com/questions/664826/play-vlc-stream-without-interface)
++ [Why the Victure 730 does not work properly](https://community.home-assistant.io/t/victure-camera-not-working/141689/40)
++ [Find correct URL for connection to Victure cam](https://www.ispyconnect.com/man.aspx?n=Victure)
++ [Send video in nodeJS](https://github.com/daspinola/video-stream-sample/blob/master/server.js)
++ [Video conversion with VLC using CLI](https://superuser.com/questions/388511/how-can-i-make-the-following-conversion-in-vlc-from-the-commandline/390240)
