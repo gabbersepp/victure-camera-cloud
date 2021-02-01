@@ -6,6 +6,10 @@ const fs = require("fs");
 const env = process.env;
 const toExclude = Object.keys(env).filter(key => key.indexOf("EXCLUDE") > -1).map(key => env[key]);
 
+function getConfig() {
+    return JSON.parse(fs.readFileSync("config/config.json").toString())
+}
+
 function groupBy(list, keyFn) {
     const obj = {}
     list.forEach(l => {
@@ -29,10 +33,12 @@ function getVideoName(f) {
     return cameraName;
 }
 
-const path = "/app/data";//"C:\\git\\rtsp-cam-manager\\cam-client\\test";
-let files = fs.readdirSync(path)
+const dataDir = getConfig().dataDir;
+const backupDir = getConfig().backupDir;
+
+let files = fs.readdirSync(dataDir)
     .filter(file => !toExclude.find(te => file.indexOf(te) > -1))
-    .map(file => ({ file, date: fs.statSync(path + "/" + file).ctime }))
+    .map(file => ({ file, date: fs.statSync(`${dataDir}/${file}`).ctime }))
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .map(x => x.file);
 
@@ -41,12 +47,13 @@ let files = fs.readdirSync(path)
     Object.keys(dict).map(key => files.push(...dict[key].filter(x => x).slice(2, dict[key].length)))
 
     files.forEach(file => {
-        const backupPath = `/app/backup/${file}`
-        const dataPath = `/app/data/${file}`;
+        const backupPath = `${backupDir}/${file}`
+        const dataPath = `${dataDir}/${file}`;
         try {
             fs.copyFileSync(dataPath, backupPath)
-            fs.rmSync(dataPath);
+            fs.unlinkSync(dataPath);
         } catch (e) {
             console.error(`seems like file ${dataPath} is already gone`)
+            console.log(e)
         }
     })
