@@ -2,3 +2,5 @@ node_modules
 *.png
 *.avi
 *.mp4
+/test-backup-data
+/test-data
