@@ -103,16 +103,18 @@ spec:
           restartPolicy: Never
           containers:
             - name: cam-server-backup-memory-cleanup
-              image: gabbersepp/cam-server-memory-cleanup:0.0.1
+              image: gabbersepp/cam-server-memory-cleanup
               volumeMounts:
                 - mountPath: /app/data
                   name: backup
               imagePullPolicy: Always
               env:
               - name: MAX_SIZE_MB
-                value: "10000"
+                value: "20000"
               - name: ONE_TIME
                 value: "true"
+              - name: EXCLUDE0
+                value: "thumbnail"
           volumes:
           - name: backup
             hostPath:
