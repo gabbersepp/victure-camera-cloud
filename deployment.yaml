@@ -17,15 +17,21 @@ spec:
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /app/data
-            name: data
+            name: sambashare
+            subPath: securitycam/data
           - mountPath: /app/config
-            name: backendconfig
+            name: sambashare
+            subPath: securitycam/config
       - name: cam-server-memory-cleanup
         image: gabbersepp/cam-server-memory-cleanup
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /app/data
-            name: data
+            name: sambashare
+            subPath: securitycam/data
+          - mountPath: /app/config
+            name: sambashare
+            subPath: securitycam/config
         env:
           - name: MAX_SIZE_MB
             value: "2000"
@@ -34,12 +40,15 @@ spec:
           - name: EXCLUDE1
             value: backendconfig.json
       volumes:
-        - name: data
-          hostPath:
-              path: /securitycam
-        - name: backendconfig
-          hostPath:
-            path: /securitycam/backendconfig/
+        - name: sambashare
+          flexVolume:
+            driver: "fstab/cifs"
+            fsType: "cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              networkPath: "//192.168.2.126/sambashare"
+              mountOptions: "uid=1001" #vlcuser
 
 ---
 
@@ -64,7 +73,8 @@ spec:
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /usr/share/nginx/html/config
-            name: frontendconfig
+            name: config
+            subPath: securitycam/config
       - name: cam-client-backend
         image: gabbersepp/cam-client-backend
         ports:
@@ -73,18 +83,30 @@ spec:
         volumeMounts:
         - mountPath: /app/data
           name: backup
+          subPath: SecurityCam
         - mountPath: /app/config/
-          name: backendconfig
+          name: config
+          subPath: securitycam/config
       volumes:
         - name: backup
-          hostPath:
-              path: /mnt/biehlercloud/SecurityCam
-        - name: frontendconfig
-          hostPath:
-            path: /securitycam/frontendconfig/
-        - name: backendconfig
-          hostPath:
-            path: /securitycam/backendconfig/
+          flexVolume:
+            driver: "fstab/cifs"
+            fsType: "cifs"
+            # secret only dummy - share is Public
+            secretRef:
+              name: "cifs-secret-private-cloud"
+            options:
+              networkPath: "//biehlercloud/Public"
+              mountOptions: "uid=1001"
+        - name: config
+          flexVolume:
+            driver: "fstab/cifs"
+            fsType: "cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              networkPath: "//192.168.2.126/sambashare"
+              mountOptions: "uid=1001"
 
 ---
 
@@ -107,6 +129,10 @@ spec:
               volumeMounts:
                 - mountPath: /app/data
                   name: backup
+                  subPath: SecurityCam
+                - mountPath: /app/config/
+                  name: config
+                  subPath: securitycam/config
               imagePullPolicy: Always
               env:
               - name: MAX_SIZE_MB
@@ -117,8 +143,24 @@ spec:
                 value: "thumbnail"
           volumes:
           - name: backup
-            hostPath:
-                path: /mnt/biehlercloud/SecurityCam
+            flexVolume:
+              driver: "fstab/cifs"
+              fsType: "cifs"
+              # secret only dummy - share is Public
+              secretRef:
+                name: "cifs-secret-private-cloud"
+              options:
+                networkPath: "//biehlercloud/Public"
+                mountOptions: ""
+          - name: config
+            flexVolume:
+              driver: "fstab/cifs"
+              fsType: "cifs"
+              secretRef:
+                name: "cifs-secret"
+              options:
+                networkPath: "//192.168.2.126/sambashare"
+                mountOptions: ""
 
 ---
 
@@ -139,23 +181,36 @@ spec:
               image: gabbersepp/cam-server-backup
               volumeMounts:
                 - mountPath: /app/data
-                  name: data
+                  name: sambashare
+                  subPath: securitycam/data
+                - mountPath: /app/config/
+                  name: sambashare
+                  subPath: securitycam/config
                 - mountPath: /app/backup
                   name: backup
+                  subPath: SecurityCam
               imagePullPolicy: Always
-              env:
-              - name: EXCLUDE0
-                value: frontendconfig
-              - name: EXCLUDE1
-                value: backendconfig
           restartPolicy: OnFailure
           volumes:
-          - name: data
-            hostPath:
-                path: /securitycam
+          - name: sambashare
+            flexVolume:
+              driver: "fstab/cifs"
+              fsType: "cifs"
+              secretRef:
+                name: "cifs-secret"
+              options:
+                networkPath: "//192.168.2.126/sambashare"
+                mountOptions: ""
           - name: backup
-            hostPath:
-                path: /mnt/biehlercloud/SecurityCam
+            flexVolume:
+              driver: "fstab/cifs"
+              fsType: "cifs"
+              # secret only dummy - share is Public
+              secretRef:
+                name: "cifs-secret-private-cloud"
+              options:
+                networkPath: "//biehlercloud/Public"
+                mountOptions: ""
 
 ---
 
