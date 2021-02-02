@@ -1,8 +1,10 @@
 # map /app/config.json
 FROM node as build
-COPY app/ /app
+COPY app/package.json /app/package.json
 WORKDIR /app
 RUN npm install
+
+COPY app/ /app
 RUN npm run build
 
 FROM nginx
