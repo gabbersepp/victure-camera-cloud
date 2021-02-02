@@ -36,9 +36,7 @@ spec:
           - name: MAX_SIZE_MB
             value: "2000"
           - name: EXCLUDE0
-            value: frontendconfig.json
-          - name: EXCLUDE1
-            value: backendconfig.json
+            value: log.txt
       volumes:
         - name: sambashare
           flexVolume:
@@ -189,6 +187,9 @@ spec:
                 - mountPath: /app/backup
                   name: backup
                   subPath: SecurityCam
+              env:
+              - name: EXCLUDE0
+                value: log.txt
               imagePullPolicy: Always
           restartPolicy: OnFailure
           volumes:

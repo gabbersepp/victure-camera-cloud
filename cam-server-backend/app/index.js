@@ -34,6 +34,11 @@ async function fetchAllStreams() {
     }
 }
 
+function writeDebugLog(msg) {
+    const config = JSON.parse(fs.readFileSync("config/config.json").toString());
+    fs.appendFileSync(`${config.dataDir}/log.txt`, msg + "\r\n")
+}
+
 function createProcess(cam, durationSeconds) {
     const date = new Date();
     let { name, url } = cam;
@@ -46,11 +51,11 @@ function createProcess(cam, durationSeconds) {
     const pr = child_process.exec(cmd);
 
     pr.stdout.on('data', data => {
-        console.log(data.toString()); 
+        writeDebugLog(data.toString()); 
     });
 
     pr.stderr.on('data', data => {
-        console.log(data.toString()); 
+        writeDebugLog(data.toString()); 
     });
 
     pr.on("close", () => {
