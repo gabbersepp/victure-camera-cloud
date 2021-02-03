@@ -58,7 +58,7 @@ async function ensureThumbnail(queue, videoContainingDir, videoName, thumbnailCo
                 }
             } catch (e) {
                 queue.splice(0, 1);
-                throw new Error("error while creating thumbnail")
+                console.log(`####error: ${e}`)
             }
         }
     }

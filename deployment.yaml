@@ -222,13 +222,36 @@ metadata:
 spec:
   selector:
     app: cam-client
-  type: NodePort
+  type: ClusterIP
   ports:
   - port: 8080
     targetPort: 8080
-    nodePort: 30009
-    name: backend-port
+    name: api
   - port: 80
     targetPort: 80
-    nodePort: 30010
-    name: frontend-port
+    name: web
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cam-client
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+        rewrite /api/(.+)$ /$1 break;  
+    nginx.ingress.kubernetes.io/whitelist-source-range:  192.168.2.0/8
+spec:
+  rules:
+  - host: cam.h5b.de
+    http:
+      paths:
+      - path: /api/
+        backend:
+          serviceName: cam-client
+          servicePort: api
+      - path: /
+        backend:
+          serviceName: cam-client
+          servicePort: web
