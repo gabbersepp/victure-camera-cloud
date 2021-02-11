@@ -48,10 +48,9 @@ function createProcess(cam, durationSeconds) {
 
     name = (name + "-" + date.toISOString()).replace(/[: ]/g, "-")
 
-    const cmd = `vlc --intf dummy -vvv ${url} --sout "#std{access=file,mux=ts,dst='${config.dataDir}/${name}.mpeg'}" vlc://quit`;
+    const cmd = ["--intf", "dummy", "-vvv", url, "--sout", `#std{access=file,mux=ts,dst='${config.dataDir}/${name}.mpeg'}`, "vlc://quit"];
     console.log("#######\r\nexecute command:\r\n\t" + cmd)
-    
-    const pr = child_process.exec(cmd);
+    const pr = child_process.spawn("vlc", cmd);
 
     pr.stdout.on('data', data => {
         writeDebugLog(data.toString()); 
@@ -68,6 +67,10 @@ function createProcess(cam, durationSeconds) {
     pr.on("exit", () => {
         cam.processEnded = true
     })
+
+    setTimeout(() => {
+        pr.kill("SIGKILL")
+    }, durationSeconds * 1000)
 
     return pr;
 }

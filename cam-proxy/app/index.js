@@ -81,13 +81,8 @@ function createProcess(cam, sdpHost) {
     let { name, url, camPort, sdpPort } = cam;
     console.log(`create new process for ${name}`)
 
-    //const cmd = `vlc --intf dummy -vvv ${url} :sout=#transcode{vcodec=h264,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:rtp{dst=127.0.0.1,port=554,mux=ts,sdp=rtsp://:554/${name.replace(" ", "")}.sdp} :no-sout-all :sout-keep vlc://quit`;
-    //console.log("#######\r\nexecute command:\r\n\t" + cmd
-    // sdp=rtsp://:${port++}/${name.replace(" ", "")}.sdp
-
     const sdpUrl = `rtsp://${sdpHost}:${sdpPort}/${name.replace(" ", "")}`
     cam.sdpUrl = sdpUrl
-    //#transcode{vcodec=mp2v,acodec=mpga,ab=128,channels=2,samplerate=44100,scodec=none}:
     const cmd = ["--intf", "dummy", "-vvv", url, `:sout=#transcode{acodec=aac,channels=2}:rtp{dst=127.0.0.1,port=${camPort},mux=ts,sdp=${sdpUrl}}` ,":sout-all", `:sout-keep`, "vlc://quit"];
     console.log("#######\r\nexecute command:\r\n\t" + cmd)
     
