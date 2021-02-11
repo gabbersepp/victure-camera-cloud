@@ -1,8 +1,3 @@
-[{
-    "url": "rtsp://admin:123456@192.168.2.140:554/live/ch00_0",
-    "name": "Garage"
-},
 {
-    "url": "rtsp://admin:123456@192.168.2.138:554/live/ch00_0",
-    "name": "Garage hinten"
-}]
+    "dataDir": "C:/git/rtsp-cam-manager/test-data"
+}

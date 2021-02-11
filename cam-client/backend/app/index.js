@@ -134,6 +134,15 @@ app.get("/file/:video", async (req, res) => {
   }
 })
 
+app.get("/state", (req, res) => {
+  if (!fs.existsSync(statePath)) {
+      res.statusMessage("state file not found")
+      return;
+  }
+
+  var obj = JSON.parse((fs.readFileSync("state/state.json").toString()));
+  res.json(obj)
+})
 
 app.get('*', (req, res) => {
   const url = req.originalUrl

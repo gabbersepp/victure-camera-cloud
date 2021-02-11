@@ -8,7 +8,16 @@ function writeConfig(config) {
     fs.writeFileSync("config/config.json", JSON.stringify(config, null, 4))
 }
 
+function getState() {
+    if (fs.existsSync("state/state.json")) {
+        return JSON.parse(fs.readFileSync("state/state.json").toString())
+    }
+
+    return {}
+}
+
 module.exports = {
     getConfig,
-    writeConfig
+    writeConfig,
+    getState
 }

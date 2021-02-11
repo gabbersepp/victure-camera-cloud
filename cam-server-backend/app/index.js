@@ -13,10 +13,11 @@ const camDict = {};
 
 async function fetchAllStreams() {
     while (true) {
-        const config = JSON.parse(fs.readFileSync("config/config.json").toString());
-        const cams = config.cameras;
+        const state = JSON.parse(fs.readFileSync("state/state.json").toString());
+        const cams = Object.keys(state)
 
-        cams.forEach(cam => {
+        cams.forEach(camKey => {
+            const cam = state[camKey]
             const staticCamObj = camDict[cam.name] || cam;
             camDict[cam.name] = staticCamObj;
 
@@ -40,12 +41,14 @@ function writeDebugLog(msg) {
 }
 
 function createProcess(cam, durationSeconds) {
+    const config = JSON.parse(fs.readFileSync("config/config.json").toString());
     const date = new Date();
     let { name, url } = cam;
     console.log(`create new process for ${name}`)
 
     name = (name + "-" + date.toISOString()).replace(/[: ]/g, "-")
-    const cmd = `vlc --intf dummy -vvv ${url} --run-time=${durationSeconds} --stop-time=${durationSeconds} --sout=file/avi:/app/data/${name}.avi vlc://quit`;
+
+    const cmd = `vlc --intf dummy -vvv ${url} --sout "#std{access=file,mux=ts,dst='${config.dataDir}/${name}.mpeg'}" vlc://quit`;
     console.log("#######\r\nexecute command:\r\n\t" + cmd)
     
     const pr = child_process.exec(cmd);
