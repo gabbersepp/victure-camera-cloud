@@ -39,22 +39,32 @@ async function ensureThumbnail(queue, videoContainingDir, videoName, thumbnailCo
 
         const nextId = new Date().getTime();
         queue.push(nextId);
+        let tryCount = 0;
 
         while (true) {
             try {
                 if (queue[0] === nextId) {
                     // this will create multiple snapshots
-                    const cmd = `vlc ${videoPath} --intf dummy --video-filter=scene --start-time=0 --stop-time=1 --scene-ratio=8 --scene-path="${tempDirName}" --vout=dummy --avcodec-hw=none vlc://quit`;
+                    const cmd = `vlc ${videoPath} --intf dummy --video-filter=scene --start-time=0 --stop-time=3 --scene-ratio=8 --scene-path="${tempDirName}" --vout=dummy --avcodec-hw=none vlc://quit`;
                     await createProcess(cmd);
     
                     // there may be multiple snapshots, take the first one
                     const firstImg = fs.readdirSync(tempDirName)[0]
-                    fs.copyFileSync(tempDirName + "/" + firstImg, thumbnailPath)
-                    fs.rmdirSync(tempDirName, { recursive: true, force: true })
-                    queue.splice(0, 1);
-                    return thumbnailPath;
+
+                    if (firstImg || tryCount++ > 5) {
+                        fs.copyFileSync(tempDirName + "/" + firstImg, thumbnailPath)
+                        fs.rmdirSync(tempDirName, { recursive: true, force: true })
+                        
+                        queue.splice(0, 1);
+                        return thumbnailPath;
+                    } else {
+                        // requeue
+                        console.log("###retry " + videoName)
+                        queue.splice(0, 1);
+                        queue.push(nextId);
+                    }
                 } else {
-                    await sleep(100);
+                    await sleep(200);
                 }
             } catch (e) {
                 queue.splice(0, 1);
