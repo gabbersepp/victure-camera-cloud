@@ -18,6 +18,9 @@ async function fetchAllStreams() {
 
         cams.forEach(camKey => {
             const cam = state[camKey]
+            if (cam.closed) {
+                return;
+            }
             const staticCamObj = camDict[cam.name] || cam;
             camDict[cam.name] = staticCamObj;
 

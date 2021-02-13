@@ -36,6 +36,7 @@ async function fetchAllStreams() {
         cams.forEach(cam => {
             const staticCamObj = camDict[cam.name] || cam;
             camDict[cam.name] = staticCamObj;
+
             if (!staticCamObj.camPort) {
                 staticCamObj.camPort = freePorts[0];
                 staticCamObj.sdpPort = freePorts[1];
@@ -71,13 +72,15 @@ function writeCurrentState(cam) {
     const state = JSON.parse(fs.readFileSync(statePath).toString())
     state[cam.name] = {
         url: cam.sdpUrl,
-        name: cam.name
+        name: cam.name,
+        closed: cam.closed
     }
 
     fs.writeFileSync(statePath, JSON.stringify(state))
 }
 
 function createProcess(cam, sdpHost) {
+    cam.closed = true;
     let { name, url, camPort, sdpPort } = cam;
     console.log(`create new process for ${name}`)
 
@@ -88,6 +91,12 @@ function createProcess(cam, sdpHost) {
     
     const pr = child_process.spawn("vlc", cmd);
 
+    // allow access to camera after 10 seconds of execution to ensure that stream is stable
+    cam.timeoutId = setTimeout(() => {
+        cam.closed = false;
+        writeCurrentState(cam)
+    }, 15000)
+
     pr.stdout.on('data', data => {
         writeDebugLog(data.toString()); 
     });
@@ -97,13 +106,21 @@ function createProcess(cam, sdpHost) {
     });
 
     pr.on("close", () => {
+        cam.closed = true
         console.log("close")
         cam.processEnded = true
+        clearTimeout(cam.timeoutId);
+        cam.timeoutId = null;
+        writeCurrentState(cam)
     })
 
     pr.on("exit", () => {
+        cam.closed = true
         console.log("exit")
         cam.processEnded = true
+        clearTimeout(cam.timeoutId);
+        cam.timeoutId = null;
+        writeCurrentState(cam)
     })
 
     writeCurrentState(cam)
