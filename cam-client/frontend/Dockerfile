@@ -1,6 +1,8 @@
 # map /app/config.json
 FROM node as build
 COPY app/package.json /app/package.json
+COPY app/package-lock.json /app/package-lock.json
+
 WORKDIR /app
 RUN npm install
 

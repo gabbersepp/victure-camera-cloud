@@ -5,7 +5,6 @@ RUN apt update && \
     apt install -y vlc && \
     useradd -m vlcuser
 
-COPY app/package.json /app/package.json
 WORKDIR /app
 
 COPY app/ /app

@@ -83,7 +83,7 @@ function createProcess(cam, sdpHost) {
 
     const sdpUrl = `rtsp://${sdpHost}:${sdpPort}/${name.replace(" ", "")}`
     cam.sdpUrl = sdpUrl
-    const cmd = ["--intf", "dummy", "-vvv", url, `:sout=#transcode{acodec=aac,channels=2}:rtp{dst=127.0.0.1,port=${camPort},mux=ts,sdp=${sdpUrl}}` ,":sout-all", `:sout-keep`, "vlc://quit"];
+    const cmd = ["--intf", "dummy", "-vvv", url, `:sout=#transcode{acodec=aac,channels=2}:rtp{sdp=${sdpUrl}}` ,":sout-all", `:sout-keep`, "vlc://quit"];
     console.log("#######\r\nexecute command:\r\n\t" + cmd)
     
     const pr = child_process.spawn("vlc", cmd);

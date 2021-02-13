@@ -11,6 +11,7 @@ spec:
       labels:
         app: cam-server
     spec:
+      hostNetwork: true
       containers:
       - name: cam-server-backend
         image: gabbersepp/cam-server-backend
@@ -22,6 +23,9 @@ spec:
           - mountPath: /app/config
             name: sambashare
             subPath: securitycam/config
+          - mountPath: /app/state
+            name: sambashare
+            subPath: securitycam/state
       - name: cam-server-memory-cleanup
         image: gabbersepp/cam-server-memory-cleanup
         imagePullPolicy: Always
@@ -32,6 +36,9 @@ spec:
           - mountPath: /app/config
             name: sambashare
             subPath: securitycam/config
+          - mountPath: /app/state
+            name: sambashare
+            subPath: securitycam/state
         env:
           - name: MAX_SIZE_MB
             value: "2000"
@@ -48,6 +55,72 @@ spec:
               networkPath: "//192.168.2.126/sambashare"
               mountOptions: "uid=1001" #vlcuser
 
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cam-proxy
+spec:
+  selector:
+    matchLabels:
+      app: cam-proxy
+  template:
+    metadata:
+      labels:
+        app: cam-proxy
+    spec:
+      nodeSelector:
+        name: biehler
+      hostNetwork: true
+      containers:
+      - name: cam-proxy
+        image: gabbersepp/cam-proxy
+        ports:
+        - containerPort: 30200
+          hostPort: 30200
+        - containerPort: 30201
+          hostPort: 30201
+        - containerPort: 30202
+          hostPort: 30202
+        - containerPort: 30203
+          hostPort: 30203
+        - containerPort: 30204
+          hostPort: 30204
+        - containerPort: 30205
+          hostPort: 30205
+        - containerPort: 30206
+          hostPort: 30206
+        - containerPort: 30207
+          hostPort: 30207
+        - containerPort: 30208
+          hostPort: 30208
+        - containerPort: 30209
+          hostPort: 30209
+        - containerPort: 30210
+          hostPort: 30210
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /app/data
+            name: sambashare
+            subPath: securitycam/data
+          - mountPath: /app/config
+            name: sambashare
+            subPath: securitycam/config
+          - mountPath: /app/state
+            name: sambashare
+            subPath: securitycam/state
+      volumes:
+      - name: sambashare
+        flexVolume:
+          driver: "fstab/cifs"
+          fsType: "cifs"
+          secretRef:
+            name: "cifs-secret"
+          options:
+            networkPath: "//192.168.2.126/sambashare"
+            mountOptions: "uid=1001"
+        
 ---
 
 apiVersion: apps/v1
@@ -85,6 +158,9 @@ spec:
         - mountPath: /app/config/
           name: config
           subPath: securitycam/config
+        - mountPath: /app/state
+          name: config
+          subPath: securitycam/state
       volumes:
         - name: backup
           flexVolume:
@@ -241,7 +317,7 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/configuration-snippet: |
         rewrite /api/(.+)$ /$1 break;  
-    nginx.ingress.kubernetes.io/whitelist-source-range:  192.168.2.0/8
+    nginx.ingress.kubernetes.io/whitelist-source-range:  192.168.2.0/24
 spec:
   rules:
   - host: cam.h5b.de

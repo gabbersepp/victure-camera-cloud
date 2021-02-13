@@ -10,6 +10,10 @@ CD ../cam-server-memory-cleanup
 CALL docker build -t gabbersepp/cam-server-memory-cleanup .
 CALL docker push gabbersepp/cam-server-memory-cleanup
 
+CD ../cam-proxy
+CALL docker build -t gabbersepp/cam-proxy .
+CALL docker push gabbersepp/cam-proxy
+
 CD ../cam-client/backend
 CALL docker build -t gabbersepp/cam-client-backend .
 CALL docker push gabbersepp/cam-client-backend
