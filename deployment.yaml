@@ -26,24 +26,6 @@ spec:
           - mountPath: /app/state
             name: sambashare
             subPath: securitycam/state
-      - name: cam-server-memory-cleanup
-        image: gabbersepp/cam-server-memory-cleanup
-        imagePullPolicy: Always
-        volumeMounts:
-          - mountPath: /app/data
-            name: sambashare
-            subPath: securitycam/data
-          - mountPath: /app/config
-            name: sambashare
-            subPath: securitycam/config
-          - mountPath: /app/state
-            name: sambashare
-            subPath: securitycam/state
-        env:
-          - name: MAX_SIZE_MB
-            value: "2000"
-          - name: EXCLUDE0
-            value: log.txt
       volumes:
         - name: sambashare
           flexVolume:
