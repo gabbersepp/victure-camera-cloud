@@ -11,6 +11,10 @@ function sleep(ms) {
 
 const camDict = {};
 
+function writeState(state) {
+    fs.writeFileSync("state/state.json", JSON.stringify(state));
+}
+
 async function fetchAllStreams() {
     while (true) {
         const state = JSON.parse(fs.readFileSync("state/state.json").toString());
@@ -21,16 +25,20 @@ async function fetchAllStreams() {
             if (cam.closed) {
                 return;
             }
-            const staticCamObj = camDict[cam.name] || cam;
+            const staticCamObj = camDict[cam.name] || { ...cam };
             camDict[cam.name] = staticCamObj;
 
             if (staticCamObj.process) {
                 if (staticCamObj.processEnded) {
                     staticCamObj.process = createProcess(staticCamObj, 300);
                     staticCamObj.processEnded = false;
+                    cam.startCounter++;
+                    writeState(state);
                 }
             } else {
                 staticCamObj.process = createProcess(staticCamObj, 300);
+                cam.startCounter = 1;
+                writeState(state);
             }
         })
 
@@ -76,15 +84,15 @@ function createProcess(cam, durationSeconds) {
         pr.kill("SIGKILL")
     }, durationSeconds * 1000)
 
-    setTimeout(() => checkFileSize(targetPath, pr), 5000);
+    setTimeout(() => checkFileSize(targetPath, pr), 10000);
 
     return pr;
 }
 
 function checkFileSize(targetPath, proc) {
     const size = fs.statSync(targetPath).size;
-    console.log(`file size 5 seconds after start: ${size}`);
-    
+    console.log(`file size 10 seconds after start: ${size}`);
+
     if (size === 0) {
         console.error(`File ${targetPath} does not contain content. Maybe there is some failure. KIlling process`);
         proc.kill("SIGKILL");

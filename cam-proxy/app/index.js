@@ -1,6 +1,8 @@
 const fs = require("fs");
 const child_process = require("child_process");
 
+const statePath = "state/state.json";
+
 function sleep(ms) {
     return new Promise(resolve => {
         setTimeout(resolve, ms);
@@ -21,6 +23,7 @@ function getFreePorts(firstOpenPort, lastOpenPort) {
 
 async function fetchAllStreams() {
     while (true) {
+        const state = JSON.parse(fs.readFileSync(statePath));
         const config = JSON.parse(fs.readFileSync("config/config.json").toString());
         const cams = config.cameras;
         const sdpHost = config.publicSdpHost;
@@ -44,7 +47,10 @@ async function fetchAllStreams() {
             }
 
             if (staticCamObj.process) {
-                if (staticCamObj.processEnded) {
+                if (!staticCamObj.processEnded && state[cam.name].startCounter > 10) {
+                    console.error(`startCounter has reached it's limit. restart process for ${cam.name}`);
+                    staticCamObj.process.kill("SIGKILL");
+                } else if (staticCamObj.processEnded) {
                     staticCamObj.process = createProcess(staticCamObj, sdpHost);
                     staticCamObj.processEnded = false;
                 }
@@ -64,7 +70,6 @@ function writeDebugLog(msg) {
 }
 
 function writeCurrentState(cam) {
-    const statePath = "state/state.json";
     if (!fs.existsSync(statePath)) {
         fs.writeFileSync(statePath, "{}")
     }
@@ -111,6 +116,7 @@ function createProcess(cam, sdpHost) {
         cam.processEnded = true
         clearTimeout(cam.timeoutId);
         cam.timeoutId = null;
+        cam.startCounter = 0;
         writeCurrentState(cam)
     })
 
@@ -120,6 +126,7 @@ function createProcess(cam, sdpHost) {
         cam.processEnded = true
         clearTimeout(cam.timeoutId);
         cam.timeoutId = null;
+        cam.startCounter = 0;
         writeCurrentState(cam)
     })
 
