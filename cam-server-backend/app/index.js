@@ -51,7 +51,8 @@ function createProcess(cam, durationSeconds) {
 
     name = (name + "-" + date.toISOString()).replace(/[: ]/g, "-")
 
-    const cmd = ["--intf", "dummy", "-vvv", url, "--sout", `#std{access=file,mux=ts,dst='${config.dataDir}/${name}.mpeg'}`, "vlc://quit"];
+    const targetPath = `${config.dataDir}/${name}.mpeg`;
+    const cmd = ["--intf", "dummy", "-vvv", url, "--sout", `#std{access=file,mux=ts,dst='${targetPath}'}`, "vlc://quit"];
     console.log("#######\r\nexecute command:\r\n\t" + cmd)
     const pr = child_process.spawn("vlc", cmd);
 
@@ -75,7 +76,19 @@ function createProcess(cam, durationSeconds) {
         pr.kill("SIGKILL")
     }, durationSeconds * 1000)
 
+    setTimeout(() => checkFileSize(targetPath, pr), 5000);
+
     return pr;
+}
+
+function checkFileSize(targetPath, proc) {
+    const size = fs.statSync(targetPath).size;
+    console.log(`file size 5 seconds after start: ${size}`);
+    
+    if (size === 0) {
+        console.error(`File ${targetPath} does not contain content. Maybe there is some failure. KIlling process`);
+        proc.kill("SIGKILL");
+    }
 }
 
 fetchAllStreams()
