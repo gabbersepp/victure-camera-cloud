@@ -28,6 +28,9 @@ async function ensureConvertedFile(filePath) {
  * @param {*} thumbnailContainingDir 
  */
 async function ensureThumbnail(queue, videoContainingDir, videoName, thumbnailContainingDir) {
+    if (!fs.existsSync(thumbnailContainingDir)) {
+        fs.mkdirSync(thumbnailContainingDir);
+    }
     const tempDirName = `${thumbnailContainingDir}/${videoName}_dir`;
     const thumbnailPath = `${thumbnailContainingDir}/${videoName}.png`
     const videoPath = `${videoContainingDir}/${videoName}`
