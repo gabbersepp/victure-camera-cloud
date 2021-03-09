@@ -23,4 +23,5 @@ CALL docker build -t gabbersepp/cam-client-frontend .
 CALL docker push gabbersepp/cam-client-frontend
 
 CD ../../
+CALL kubectl delete -f .\deployment.yaml
 CALL kubectl apply -f .\deployment.yaml
