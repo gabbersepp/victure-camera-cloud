@@ -21,9 +21,23 @@ function getFreePorts(firstOpenPort, lastOpenPort) {
     return allPorts.filter(x => !usedPorts.find(y => y === x))
 }
 
+function getState() {
+    let state;
+
+    try {
+        state = JSON.parse(fs.readFileSync(statePath));
+    } catch (e) {
+        console.error(state);
+        fs.writeFileSync(statePath, "{}");
+        state = {};
+    }
+
+    return state;
+}
+
 async function fetchAllStreams() {
     while (true) {
-        const state = JSON.parse(fs.readFileSync(statePath));
+        const state = getState();
         const config = JSON.parse(fs.readFileSync("config/config.json").toString());
         const cams = config.cameras;
         const sdpHost = config.publicSdpHost;
