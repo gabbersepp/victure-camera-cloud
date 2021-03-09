@@ -92,7 +92,10 @@ function createProcess(cam, durationSeconds) {
 }
 
 function getFileSize(targetPath) {
-    return fs.statSync(targetPath).size;
+    if (fs.existsSync(targetPath)) {
+        return fs.statSync(targetPath).size;
+    }
+    return 0;
 }
 
 function deleteIfNoContent(targetPath) {
