@@ -61,7 +61,7 @@ async function fetchAllStreams() {
             }
 
             if (staticCamObj.process) {
-                if (!staticCamObj.processEnded && state[cam.name].startCounter > 10) {
+                if (!staticCamObj.processEnded && state[cam.name] && state[cam.name].startCounter > 10) {
                     console.error(`startCounter has reached it's limit. restart process for ${cam.name}`);
                     staticCamObj.process.kill("SIGKILL");
                 } else if (staticCamObj.processEnded) {
