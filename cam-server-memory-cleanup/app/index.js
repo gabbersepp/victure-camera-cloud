@@ -30,28 +30,12 @@ function sleep(ms) {
     })
 }
 
-function getSizeLinux() {
-    execSync(`du -s ${getConfig().dataDir} > du.txt`);
-    const output = readFileSync('du.txt').toString();
-    console.log(output);
-    let space = output.match(/[0-9]+/)[0]
-    return space / 1024
-}
-
-function getSizeWindows() {
-    // no easy command :-(
+function getSize() {
+    // "du" command under linux failed several times due to access problems
     const dataDir = getConfig().dataDir
     return readdirSync(dataDir).map(f => {
         return statSync(`${dataDir}/${f}`).size
     }).reduce((x, y) => x + y) / (1024 * 1024)
-}
-
-function getSize() {
-    if (os.platform() === "win32") {
-        return getSizeWindows()
-    }
-
-    return getSizeLinux();
 }
 
 async function work() {
