@@ -74,23 +74,36 @@ function createProcess(cam, durationSeconds) {
 
     pr.on("close", () => {
         cam.processEnded = true
+        deleteIfNoContent(targetPath);
     })
 
     pr.on("exit", () => {
         cam.processEnded = true
+        deleteIfNoContent(targetPath);
     })
 
     setTimeout(() => {
         pr.kill("SIGKILL")
     }, durationSeconds * 1000)
 
-    setTimeout(() => checkFileSize(targetPath, pr), 10000);
+    setTimeout(() => handleFileSize(targetPath, pr), 10000);
 
     return pr;
 }
 
-function checkFileSize(targetPath, proc) {
-    const size = fs.statSync(targetPath).size;
+function getFileSize(targetPath) {
+    return fs.statSync(targetPath).size;
+}
+
+function deleteIfNoContent(targetPath) {
+    if (fs.existsSync(targetPath) && getFileSize(targetPath) === 0) {
+        console.error(`deleted '${targetPath}'. no content found`);
+        fs.unlinkSync(targetPath);
+    }
+}
+
+function handleFileSize(targetPath, proc) {
+    const size = getFileSize(targetPath);
     console.log(`file size 10 seconds after start: ${size}`);
 
     if (size === 0) {
