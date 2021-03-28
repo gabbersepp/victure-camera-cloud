@@ -12,6 +12,7 @@ spec:
         app: cam-server
     spec:
       hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: cam-server-backend
         image: gabbersepp/cam-server-backend
@@ -55,32 +56,44 @@ spec:
       nodeSelector:
         name: biehler
       hostNetwork: true
+      #dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: cam-proxy
         image: gabbersepp/cam-proxy
         ports:
         - containerPort: 30200
           hostPort: 30200
+          hostIP: 192.168.2.126
         - containerPort: 30201
           hostPort: 30201
+          hostIP: 192.168.2.126
         - containerPort: 30202
           hostPort: 30202
+          hostIP: 192.168.2.126
         - containerPort: 30203
           hostPort: 30203
+          hostIP: 192.168.2.126
         - containerPort: 30204
           hostPort: 30204
+          hostIP: 192.168.2.126
         - containerPort: 30205
           hostPort: 30205
+          hostIP: 192.168.2.126
         - containerPort: 30206
           hostPort: 30206
+          hostIP: 192.168.2.126
         - containerPort: 30207
           hostPort: 30207
+          hostIP: 192.168.2.126
         - containerPort: 30208
           hostPort: 30208
+          hostIP: 192.168.2.126
         - containerPort: 30209
           hostPort: 30209
+          hostIP: 192.168.2.126
         - containerPort: 30210
           hostPort: 30210
+          hostIP: 192.168.2.126
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /app/data
@@ -102,7 +115,7 @@ spec:
           options:
             networkPath: "//192.168.2.126/sambashare"
             mountOptions: "uid=1001"
-        
+
 ---
 
 apiVersion: apps/v1
