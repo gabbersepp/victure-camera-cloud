@@ -27,6 +27,9 @@ spec:
           - mountPath: /app/state
             name: sambashare
             subPath: securitycam/state
+        env:
+          - name: TZ
+            value: Europe/Berlin
       volumes:
         - name: sambashare
           flexVolume:
