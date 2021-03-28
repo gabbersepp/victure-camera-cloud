@@ -2,6 +2,7 @@ const fs = require("fs");
 const child_process = require("child_process");
 
 const statePath = "state/state.json";
+let lastSuccessfulState = {};
 
 function sleep(ms) {
     return new Promise(resolve => {
@@ -22,22 +23,26 @@ function getFreePorts(firstOpenPort, lastOpenPort) {
 }
 
 function getState() {
-    let state;
+    let state = lastSuccessfulState;
+    let json = "not read yet";
 
     try {
-        state = JSON.parse(fs.readFileSync(statePath));
+        json = fs.readFileSync(statePath).toString();
+        state = JSON.parse(json);
     } catch (e) {
-        console.error(state);
-        fs.writeFileSync(statePath, "{}");
-        state = {};
+        console.error(`error: ${e} - json: ${json}`);
+        fs.writeFileSync(statePath, JSON.stringify(state));
     }
 
     return state;
 }
 
 async function fetchAllStreams() {
+
     while (true) {
         const state = getState();
+        console.info(`state: ${JSON.stringify(state)}`);
+
         const config = JSON.parse(fs.readFileSync("config/config.json").toString());
         const cams = config.cameras;
         const sdpHost = config.publicSdpHost;
@@ -45,10 +50,13 @@ async function fetchAllStreams() {
         const lastOpenPort = config.lastOpenPort;
 
         if (cams.length > (lastOpenPort - firstOpenPort)/2) {
+            console.error("Not enough open ports available")
             throw new Error("Not enough open ports available")
         }
 
         const freePorts = getFreePorts(firstOpenPort, lastOpenPort)
+
+        console.info(`free ports: ${freePorts}`);
 
         cams.forEach(cam => {
             const staticCamObj = camDict[cam.name] || cam;
@@ -59,6 +67,8 @@ async function fetchAllStreams() {
                 staticCamObj.sdpPort = freePorts[1];
                 freePorts.splice(0, 2)
             }
+
+            console.info(`csam obj: ${JSON.stringify( { ...staticCamObj, process: null, timeoutId: null })}`);
 
             if (staticCamObj.process) {
                 if (!staticCamObj.processEnded && state[cam.name] && state[cam.name].startCounter > 10) {
@@ -79,7 +89,7 @@ async function fetchAllStreams() {
 
 function writeDebugLog(msg) {
     const config = JSON.parse(fs.readFileSync("config/config.json").toString());
-    const logPath = `${config.dataDir}/log.txt`
+    const logPath = `${config.dataDir}/log_proxy.txt`
     fs.appendFileSync(logPath, msg + "\r\n")
 }
 
@@ -96,6 +106,7 @@ function writeCurrentState(cam) {
     }
 
     fs.writeFileSync(statePath, JSON.stringify(state))
+    lastSuccessfulState = state;
 }
 
 function createProcess(cam, sdpHost) {
@@ -105,7 +116,7 @@ function createProcess(cam, sdpHost) {
 
     const sdpUrl = `rtsp://${sdpHost}:${sdpPort}/${name.replace(" ", "")}`
     cam.sdpUrl = sdpUrl
-    const cmd = ["--intf", "dummy", "-vvv", url, `:sout=#transcode{acodec=aac,channels=2}:rtp{sdp=${sdpUrl}}` ,":sout-all", `:sout-keep`, "vlc://quit"];
+    const cmd = ["--intf", "dummy", "-vvv", url, "--rtsp-host", sdpHost, `:sout=#transcode{acodec=aac,channels=2}:rtp{sdp=${sdpUrl}}` ,":sout-all", `:sout-keep`, "vlc://quit"];
     console.log("#######\r\nexecute command:\r\n\t" + cmd)
     
     const pr = child_process.spawn("vlc", cmd);

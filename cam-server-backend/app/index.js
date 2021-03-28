@@ -18,6 +18,7 @@ function writeState(state) {
 async function fetchAllStreams() {
     while (true) {
         const state = JSON.parse(fs.readFileSync("state/state.json").toString());
+        console.info(`state: ${state}`);
         const cams = Object.keys(state)
 
         cams.forEach(camKey => {
@@ -48,7 +49,7 @@ async function fetchAllStreams() {
 
 function writeDebugLog(msg) {
     const config = JSON.parse(fs.readFileSync("config/config.json").toString());
-    fs.appendFileSync(`${config.dataDir}/log.txt`, msg + "\r\n")
+    fs.appendFileSync(`${config.dataDir}/log_cam_server_backend.txt`, msg + "\r\n")
 }
 
 function createProcess(cam, durationSeconds) {
@@ -57,7 +58,7 @@ function createProcess(cam, durationSeconds) {
     let { name, url } = cam;
     console.log(`create new process for ${name}`)
 
-    name = (name + "-" + date.toISOString()).replace(/[: ]/g, "-")
+    name = (name + "-" + date.toLocaleString("de-de")).replace(/[: ,\.\/]/g, "-")
 
     const targetPath = `${config.dataDir}/${name}.mpeg`;
     const cmd = ["--intf", "dummy", "-vvv", url, "--sout", `#std{access=file,mux=ts,dst='${targetPath}'}`, "vlc://quit"];
@@ -95,6 +96,8 @@ function getFileSize(targetPath) {
     if (fs.existsSync(targetPath)) {
         return fs.statSync(targetPath).size;
     }
+
+    console.error(`file ${targetPath} does not exist`)
     return 0;
 }
 
