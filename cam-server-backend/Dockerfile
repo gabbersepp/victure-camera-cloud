@@ -2,7 +2,7 @@
 # docker run -it --rm -v c:/git/rtsp-cam-manager:/app/data cam-server bash
 FROM node
 RUN apt update && \
-    apt install -y vlc && \
+    apt install -y vlc net-tools && \
     useradd -m vlcuser
 
 WORKDIR /app
