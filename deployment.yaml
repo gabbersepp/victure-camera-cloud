@@ -208,7 +208,7 @@ spec:
               imagePullPolicy: Always
               env:
               - name: MAX_SIZE_MB
-                value: "20000"
+                value: "40000"
               - name: ONE_TIME
                 value: "true"
               - name: EXCLUDE0
