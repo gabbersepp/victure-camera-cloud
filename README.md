@@ -1,3 +1,8 @@
+# This repo is OBSOLETE
+ffmpeg can read the stream of the victure cameras. I tried the command from this blog and it worked nicely: https://medium.com/@tom.humph/saving-rtsp-camera-streams-with-ffmpeg-baab7e80d767
+This repo is not needed anymore. maybe I built a new one with ffmpeg and some simpler setup
+
+
 # Victure Video Cloud
 This is a free, self hosted alternative for the Cloud storage, provided by camera manufacturer Victure.
 
